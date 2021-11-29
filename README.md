@@ -23,7 +23,7 @@ But `spin-brewery`, unlike the mentioned above tools, is not hardcoding any rele
 
 ## Usage
 ### Initial preparations
-ideally you shoul have custom python virtual environment, even though `spin-brewery` depends only on single library: **pyyaml**
+Ideally you should have custom python virtual environment, even though `spin-brewery` depends only on single external library: **pyyaml**
 
 ### Prepare docker compose scenario
 Get the latest release information:
@@ -86,7 +86,7 @@ services:
 timestamp: '2021-06-30 06:23:13'
 version: 1.26.6
 ```
-Generate docker compose scenario. File docker-compose.yml will be generated in the root of the repo. In case some older scenario exists - it will me moved to backups file:
+Generate docker compose scenario. File `docker-compose.yml` will be generated in the root of the repo. In case some older scenario exists - it will me moved to backup file:
 ```
 $ python brewery.py --generate-docker-compose
 [ INFO ] Generating docker compose for release 1.26.6:
@@ -105,7 +105,7 @@ $ python brewery.py --generate-docker-compose
 [ INFO ] Generated docker-compose.yml
 ```
 ### Deploy docker compose scenario
-*IMPORTANT*: keep in mind that 4core/16RAM is recommended to deploy all the services. In my case I was running setup on 8core/16RAM, without any significant issues.
+*IMPORTANT*: keep in mind that 4core/16RAM is recommended to deploy all the services. In my case I was running setup on 8core/16RAM laptop, without any significant issues.
 
 First of all - deploy MySQL DB machine:
 ```
@@ -125,4 +125,5 @@ Bring up all the services:
 $ docker-compose up -d
 ```
 Visit `http://localhost:9000` to access `Deck` UI.
+
 *NOTICE*: as of now, docker compose scenario is not configured to perform extensive checkouts, so connectivity to underlying services might not be in place immediately, since Java services might need time to start up (main `Deck` dependency is `Gate` - a gateway to underlying microservices).
