@@ -113,7 +113,7 @@ $ docker-compose up -d spin-db
 ```
 Now add needed database/permissions:
 ```
-$ docker exec -it spin-brewery_spin-db_1 sh -c 'exec mysql -uroot -pspinnaker < /opt/spinnaker/sql/front50_mysql.sql'
+$ docker exec -it spin-brewery_spin-db_1 sh -c 'exec mysql -uroot -pspinnaker < /opt/spinnaker/sql/mysql.sql'
 ```
 *OPTIONAL*: bring up Front50 service, to ensure MySQL connectivity is ok, and service is able to prepare all the needed tables.
 ```

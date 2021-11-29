@@ -69,6 +69,7 @@ services:
         - ./config/default/gate.yml:/opt/spinnaker/config/gate.yml
         - ./config/default/spinnaker.yml:/opt/spinnaker/config/spinnaker.yml
     depends_on:
+      - spin-keel
       - spin-redis
       - spin-clouddriver
       - spin-echo
@@ -157,7 +158,26 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./sql/front50_mysql.sql:/opt/spinnaker/sql/front50_mysql.sql
+      - ./sql/mysql.sql:/opt/spinnaker/sql/mysql.sql
+
+  spin-keel:
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+    image: us-docker.pkg.dev/spinnaker-community/docker/keel:0.1.0-20210420170214
+    volumes:
+      - ./config/default/keel.yml:/opt/spinnaker/config/keel.yml
+      - ./config/default/spinnaker.yml:/opt/spinnaker/config/spinnaker.yml
+    networks:
+      - spinnaker-network
+    depends_on:
+      - spin-orca
+      - spin-echo
+      - spin-igor
+      - spin-front50
+      - spin-fiat
+      - spin-db
+    ports:
+      - 8333:8333
 
 networks:
     spinnaker-network:
