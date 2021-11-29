@@ -1,0 +1,163 @@
+version: '3.5'
+services:
+  spin-clouddriver:
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+    image: __placeholder__
+    volumes:
+      - ./config/default/clouddriver.yml:/opt/spinnaker/config/clouddriver.yml
+      - ./config/default/spinnaker.yml:/opt/spinnaker/config/spinnaker.yml
+    networks:
+      - spinnaker-network
+    depends_on:
+      - spin-redis
+    ports:
+      - 7002:7002
+
+  spin-deck:
+    environment:
+      PROTOCOL: http
+      AUTH_ENABLED: "false"
+      FIAT_ENABLED: "false"
+      API_HOST: http://spin-gate:8084
+    image: __placeholder__
+    volumes:
+      - ./config/default/settings.js:/opt/spinnaker/config/settings.js
+    networks:
+      - spinnaker-network
+    depends_on:
+      - spin-gate
+    ports:
+      - 9000:9000
+
+  spin-echo:
+    environment:
+      JAVA_OPTS: "-XX:+UnlockExperimentalVMOptions -XX:MaxRAMFraction=2 -XX:+UseContainerSupport"
+      SPRING_PROFILES_ACTIVE: local
+    image: __placeholder__
+    volumes:
+      - ./config/default/echo.yml:/opt/spinnaker/config/echo.yml
+      - ./config/default/spinnaker.yml:/opt/spinnaker/config/spinnaker.yml
+    networks:
+      - spinnaker-network
+    ports:
+      - 8089:8089
+    depends_on:
+      - spin-front50
+      - spin-orca
+
+  spin-front50:
+    environment:
+      JAVA_OPTS: "-XX:+UnlockExperimentalVMOptions -XX:MaxRAMFraction=2 -XX:+UseContainerSupport"
+    image: __placeholder__
+    volumes:
+      - ./sql/front50_mysql.sql:/opt/spinnaker/sql/front50_mysql.sql
+      - ./config/default/front50.yml:/opt/spinnaker/config/front50.yml
+      - ./config/default/spinnaker.yml:/opt/spinnaker/config/spinnaker.yml
+    networks:
+      - spinnaker-network
+    ports:
+      - 8080:8080
+    depends_on:
+      - spin-redis
+
+  spin-gate:
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+    image: __placeholder__
+    volumes:
+        - ./config/default/gate.yml:/opt/spinnaker/config/gate.yml
+        - ./config/default/spinnaker.yml:/opt/spinnaker/config/spinnaker.yml
+    depends_on:
+      - spin-redis
+      - spin-clouddriver
+      - spin-echo
+      - spin-front50
+      - spin-orca
+      - spin-rosco
+    networks:
+      - spinnaker-network
+    ports:
+      - 8084:8084
+
+  spin-igor:
+    image: __placeholder__
+    depends_on:
+      - spin-redis
+      - spin-echo
+    networks:
+      - spinnaker-network
+    ports:
+      - 8088:8088
+
+  spin-orca:
+    environment:
+      JAVA_OPTS: "-XX:+UnlockExperimentalVMOptions -XX:MaxRAMFraction=2 -XX:+UseContainerSupport"
+      SPRING_PROFILES_ACTIVE: local
+    image: __placeholder__
+    volumes:
+      - ./config/default/orca.yml:/opt/spinnaker/config/orca.yml
+      - ./config/default/spinnaker.yml:/opt/spinnaker/config/spinnaker.yml
+      - ./config/default/plugins.yml:/opt/spinnaker/config/plugins.yml
+    depends_on:
+      - spin-redis
+      - spin-clouddriver
+      - spin-front50
+      - spin-rosco
+    networks:
+      - spinnaker-network
+    ports:
+      - 8083:8083
+
+  spin-rosco:
+    image: __placeholder__
+    volumes:
+      - ./config/default/rosco.yml:/opt/spinnaker/config/rosco.yml
+      - ./config/default/spinnaker.yml:/opt/spinnaker/config/spinnaker.yml
+    depends_on:
+      - spin-redis
+    ports:
+      - 8087:8087
+    networks:
+      - spinnaker-network
+    environment:
+      JAVA_OPTS: "-XX:+UnlockExperimentalVMOptions -XX:MaxRAMFraction=2 -XX:+UseContainerSupport"
+
+  spin-fiat:
+    image: __placeholder__
+    volumes:
+      - ./config/default/spinnaker.yml:/opt/spinnaker/config/spinnaker.yml
+    depends_on:
+      - spin-redis
+      - spin-clouddriver
+      - spin-front50
+    networks:
+      - spinnaker-network
+    ports:
+      - 7003:7003
+
+  spin-redis:
+    image: gcr.io/kubernetes-spinnaker/redis-cluster:v2
+    environment:
+      MASTER: "true"
+    networks:
+      - spinnaker-network
+    ports:
+      - 6379:6379
+
+  spin-db:
+    image: mysql:5.7
+    command: '--default-authentication-plugin=mysql_native_password'
+    #restart: always
+    environment:
+      # MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_ROOT_PASSWORD: spinnaker
+    networks:
+      - spinnaker-network
+    ports:
+      - 3306:3306
+    volumes:
+      - ./sql/front50_mysql.sql:/opt/spinnaker/sql/front50_mysql.sql
+
+networks:
+    spinnaker-network:

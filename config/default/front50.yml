@@ -1,0 +1,51 @@
+spectator:
+  applicationName: ${spring.application.name}
+  webEndpoint:
+    enabled: false
+
+spinnaker:
+  s3:
+    rootFolder: front50
+    enabled: false
+  oracle:
+    enabled: false
+  gcs:
+    rootFolder: front50
+    enabled: false
+  azs:
+    enabled: false
+  redis:
+    host: spin-redis
+    port: 6379
+    enabled: false
+
+sql:
+  enabled: true
+  connectionPools:
+    default:
+      default: true
+      jdbcUrl: jdbc:mysql://spin-db:3306/front50
+      user: root
+      password: spinnaker
+  migration:
+    user: root
+    password: spinnaker
+    jdbcUrl: jdbc:mysql://spin-db:3306/front50
+
+server:
+  port: ${services.front50.port:8080}
+  address: ${services.front50.host:localhost}
+
+cassandra:
+  enabled: false
+
+hystrix:
+  command:
+    default.execution.isolation.thread.timeoutInMilliseconds: 15000
+  threadpool:
+    DefaultNotificationDAO:
+      coreSize: 25
+      maxQueueSize: 100
+    DefaultPipelineDAO:
+      coreSize: 25
+      maxQueueSize: 100
